@@ -116,11 +116,14 @@ public class Main {
                     2 - операнды вне диапазона
                     3 - символ операции некорректен
                     4 - ошибка в структуре записи выражения
-                    5 - пустая строка */
+                    5 - пустая строка
+                    6 - введены одновременно римские и арабские числа*/
         int date1 = 1; //первый операнд
         int date2 = 1; // второй операнд
         char dateOp; // символ операции
         int i;
+        boolean j;
+        char [] operation1 = {'+', '-', '/', '*'}; // все возможные операции
         String dataInpV;
         String regex1 = "^(\\-)?[0-9]*$"; // шаблон для проверки подстроки на арабские цифры
         String regex2 = "^[+\\-*/]$"; // шаблон для проверки строки на корректность ввода операции
@@ -155,9 +158,25 @@ public class Main {
         }
 
 
-        Matcher matcher1 = pattern1.matcher(data[0]); //проверка на соответствие только арабским цифрам первого операнда
-        Matcher matcher2 = pattern1.matcher(data[2]); //проверка на соответствие только арабским цифрам второго операнда
+        Matcher matcher1 = pattern1.matcher(data[0]); //проверка на соответствие только арабским числам первого операнда
+        Matcher matcher2 = pattern1.matcher(data[2]); //проверка на соответствие только арабским числам второго операнда
         Matcher matcher3 = pattern2.matcher(data[1]); // проверка на валидность символа операции
+        Matcher matcher4 = pattern3.matcher(data[0]); // проверка на соответствие римским числам первого операнда
+        Matcher matcher5 = pattern3.matcher(data[2]); // проверка на соответствие римским числам второго операнда
+            i = 0;
+            j = false;
+            //  проверка на допустимость операции и отработка исключения
+            try {
+                while ( j != true ){
+                    if (data[1].charAt(0) == operation1[i]) j =true;
+                    i++;
+                }
+            }
+            catch (ArrayIndexOutOfBoundsException exc){
+                bugIn = 3;
+                return bugIn;
+            }
+
         if (matcher1.matches() & matcher3.matches() & matcher2.matches()) {
             date1 = Integer.parseInt(data[0]); // преобразование первой подстроки в первый операнд
             date2 = Integer.parseInt(data[2]);// преобразование третьей подстроки во втрой операнд
@@ -171,8 +190,7 @@ public class Main {
             }
         }
 
-        Matcher matcher4 = pattern3.matcher(data[0]);
-        Matcher matcher5 = pattern3.matcher(data[2]);
+
         //System.out.println(matcher4.matches() + " " + matcher5.matches() + " " + matcher3.matches());
         if (matcher4.matches() & matcher5.matches() & matcher3.matches()) {
             date1 = roman2Decimal(data[0]); // преобразование первого римского числа в первый операнд
@@ -185,6 +203,12 @@ public class Main {
                 bugIn = 2;
                 return bugIn;
             }
+        }
+        // проверка на принадлежность обоих чисел к одной системе
+        if ((matcher1.matches() & matcher5.matches())
+                | (matcher2.matches() & matcher4.matches())){
+            bugIn = 6;
+            return bugIn;
         }
         bugIn = 9;
         return bugIn;
@@ -226,6 +250,8 @@ public class Main {
                 return "Ошибка в структуре выражения";
             case 5:
                 return "Пустая строка";
+            case 6:
+                return "Числа могут быть или только римские или только арабские ";
         }
         return result;
     }
